@@ -94,11 +94,11 @@ module seq_det_1011 (
             S10: ns = (in) ? S101 : IDLE;
             S101: ns = (in) ? S1011 : S10;
             S1011: ns = (in) ? S1 : S10;
-            default: ;
+            default: ns = IDLE;
         endcase
     end
 
-    assign detect = (cs == S101) && in;
+    assign detect = (ns === S1011);
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
