@@ -75,10 +75,49 @@ module cache_plru #(
   input  logic [$clog2(N_WAYS)-1:0] access_way,
   output logic [$clog2(N_WAYS)-1:0] victim_way
 );
-    logic [N_WAYS-2:0] lru [NUM_SETS][N_WAYS];
+    localparam int LEVELS = $clog2(N_WAYS);
+    localparam int TREE_BITS = N_WAYS-1;
+
+    logic [TREE_BITS-1:0] tree [NUM_SETS];
 
     always_comb begin
-        
-    end 
+      int node;
+      node = 0;
+      victim_way = '0;
+      for (int l = 0; l < LEVELS; l++) begin
+        if (tree[access_set][node] == 1'b0) begin
+          node = node * 2 + 1;
+          victim_way[LEVELS-1-l] = 0;
+        end else begin
+          node = node * 2 + 2;
+          victim_way[LEVELS-1-l] = 1;
+        end
+      end
+    end
 
+    logic [TREE_BITS-1:0] next_tree;
+    always_comb begin
+      int node;
+      next_tree = tree[access_set];
+      node = 0;
+      for (int l = 0; l < LEVELS; l++) begin
+        if (access_way[LEVELS-1-l] == 1'b0) begin
+          next_tree[node] = 1;
+          node = node * 2 + 1;
+        end else begin
+          next_tree[node] = 0;
+          node = node * 2 + 2;
+        end
+      end
+    end
+
+    always_ff @(posedge clk or negedge rst_n) begin
+      if (!rst_n) begin
+        for (int i = 0; i < NUM_SETS; i++) begin
+          tree[i] <= '0;
+        end 
+      end else if (access_valid) begin
+        tree[access_set] <= next_tree;
+      end
+    end
 endmodule
