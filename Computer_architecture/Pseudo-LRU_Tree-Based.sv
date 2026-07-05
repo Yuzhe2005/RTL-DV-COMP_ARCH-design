@@ -62,7 +62,7 @@
 //    - This module only handles replacement metadata, not cache data/tag storage.
 // ============================================================
 
-`default_nettype 
+`default_nettype none
 
 module cache_plru #(
   parameter int NUM_SETS = 64,
