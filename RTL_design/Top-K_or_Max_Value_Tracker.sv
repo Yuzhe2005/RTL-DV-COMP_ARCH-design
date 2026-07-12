@@ -93,7 +93,9 @@ module top_k_tracker #(
     logic [DATA_WIDTH-1:0] top_values_d [K];
 
     always_comb begin
-        for (int i = 0; i < K ; i++) top_values_d[i] = 0; // 第一遍忘了归零了
+        // for (int i = 0; i < K ; i++) top_values_d[i] = 0; // 第一遍忘了归零了
+        for (int i = 0; i < K; i++)
+            top_values_d[i] = top_values[i]; // 这样写更好
         for (int i = 0; i < K; i++) begin
             if (top_values[i] < in_data) begin
                 top_values_d[i] = in_data;
@@ -101,8 +103,7 @@ module top_k_tracker #(
                     top_values_d[j] = top_values[j-1];
                 end
                 break;
-            end else 
-                top_values_d[i] = top_values[i];
+            end
         end
     end
 
