@@ -130,12 +130,12 @@ module alu #(
 
     always_comb begin
         case (op)
-            4'd0: result_calc = a+b;
-            4'd1: result_calc = a-b;
+            4'd0: result_calc = {1'b0, a} + {1'b0, b};
+            4'd1: result_calc = {1'b0, a} - {1'b0, b};
             4'd2: result_calc = {1'b0, a&b};
             4'd3: result_calc = {1'b0, a|b};
             4'd4: result_calc = {1'b0, a^b};
-            4'd5: result_calc = {{(W-1){1'b0}}, $signed(a) < $signed(b)};
+            4'd5: result_calc = {{(W){1'b0}}, $signed(a) < $signed(b)};
             4'd6: result_calc = {1'b0, a << shamt};
             4'd7: result_calc = {1'b0, a >> shamt};
             4'd8: result_calc = {1'b0, $signed(a) >>> shamt};
@@ -148,11 +148,14 @@ module alu #(
     assign negative = result[W-1];
 
     always_comb begin
-        overflow = 0;
-        // if ((op == 4'd0 && a[W-1] && b[W-1] && !result[W-1]) ||
-        //     (op == 4'd1 && !a[W-1] && b[W-1] && result[W-1])) // 第一遍写错了
-        if ((a[W-1] == b[W-1]) && (result[W-1] != a[W-1]) || 
-            (a[W-1] != b[W-1]) && (result[W-1] != a[W-1]))
-            overflow = 1;
+        overflow = 1'b0;
+
+        if (op == 4'd0) begin
+            overflow = (a[W-1] == b[W-1]) &&
+                    (result[W-1] != a[W-1]);
+        end else if (op == 4'd1) begin
+            overflow = (a[W-1] != b[W-1]) &&
+                    (result[W-1] != a[W-1]);
+        end
     end
 endmodule
