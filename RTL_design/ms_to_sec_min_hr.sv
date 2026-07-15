@@ -146,7 +146,7 @@ module timebase (
             hour_pulse <= 0;
         end else begin
             hour_pulse <= 0;
-            if (hour_pulse) begin
+            if (min_pulse) begin
                 if (min_cnt ==  59) begin
                     min_cnt <= '0;
                     hour_pulse <= 1;
